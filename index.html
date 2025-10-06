@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Project Viewer</title>
+    <title>Trello Card Viewer</title>
     <style>
         * {
             margin: 0;
@@ -342,13 +342,31 @@
             font-size: 14px;
             border-top: 1px solid #e2e8f0;
         }
+        
+        .auto-refresh-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #e0f2fe;
+            color: #0369a1;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            margin-top: 10px;
+        }
+        
+        .auto-refresh-status::before {
+            content: '🔄';
+            animation: spin 2s linear infinite;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
             <div class="logo-container">
-                <img src="Logo.png" alt="Company Logo" class="logo">
+                <img src="attached_assets/Untitled Design - 1_1759780984374.png" alt="Company Logo" class="logo">
             </div>
             <h1>Project Details</h1>
             <p>Client Project Dashboard</p>
@@ -373,7 +391,12 @@
         <button class="refresh-btn" onclick="loadCardData()">🔄 Refresh Data</button>
         
         <div class="footer">
-            © 2025 Khulisa Media. All rights reserved.
+            <div class="auto-refresh-status">
+                Auto-refreshing every 60 seconds
+            </div>
+            <div style="margin-top: 10px;">
+                © 2025 Ecaleni Guest House. All rights reserved.
+            </div>
         </div>
     </div>
 
@@ -548,6 +571,11 @@
         }
 
         loadCardData();
+        
+        setInterval(() => {
+            loadCardData();
+        }, 60000);
     </script>
 </body>
 </html>
+
