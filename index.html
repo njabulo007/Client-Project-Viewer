@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trello Card Viewer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%);
+            min-height: 100vh;
+            padding: 30px 20px;
+        }
+        
+        .container {
+            max-width: 950px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.04);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .logo-container {
+            margin-bottom: 20px;
+        }
+        
+        .logo {
+            max-width: 120px;
+            height: auto;
+            filter: brightness(0) invert(1);
+            margin: 0 auto;
+        }
+        
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 8px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+        
+        .header p {
+            opacity: 0.95;
+            font-size: 16px;
+            font-weight: 300;
+        }
+        
+        .card-content {
+            padding: 30px;
+        }
+        
+        .card-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #3b82f6;
+            letter-spacing: -0.5px;
+        }
+        
+        .card-section {
+            margin-bottom: 30px;
+        }
+        
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #5e6c84;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 20px;
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            margin-right: 10px;
+            border-radius: 2px;
+        }
+        
+        .card-description {
+            background: #f4f5f7;
+            padding: 20px;
+            border-radius: 8px;
+            line-height: 1.6;
+            color: #172b4d;
+            white-space: pre-wrap;
+        }
+        
+        .labels {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        .label {
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            color: white;
+        }
+        
+        .due-date {
+            background: #f4f5f7;
+            padding: 12px;
+            border-radius: 8px;
+            display: inline-block;
+            color: #172b4d;
+            font-weight: 500;
+        }
+        
+        .checklist {
+            background: #f4f5f7;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        
+        .checklist-title {
+            font-weight: 600;
+            color: #172b4d;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .checklist-progress {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .progress-bar {
+            flex: 1;
+            height: 8px;
+            background: #dfe1e6;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: #61bd4f;
+            transition: width 0.3s ease;
+        }
+        
+        .progress-text {
+            font-size: 14px;
+            font-weight: 600;
+            color: #5e6c84;
+            min-width: 45px;
+            text-align: right;
+        }
+        
+        .overall-progress {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        
+        .overall-progress h3 {
+            font-size: 16px;
+            margin-bottom: 10px;
+            opacity: 0.9;
+        }
+        
+        .overall-progress .progress-bar {
+            height: 12px;
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .overall-progress .progress-fill {
+            background: #61bd4f;
+        }
+        
+        .overall-progress .progress-text {
+            color: white;
+            font-size: 18px;
+            margin-top: 8px;
+        }
+        
+        .checklist-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 10px;
+            padding: 8px;
+            background: white;
+            border-radius: 4px;
+        }
+        
+        .checklist-checkbox {
+            width: 18px;
+            height: 18px;
+            margin-right: 10px;
+            margin-top: 2px;
+            border: 2px solid #5e6c84;
+            border-radius: 3px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .checklist-checkbox.checked {
+            background: #61bd4f;
+            border-color: #61bd4f;
+        }
+        
+        .checklist-checkbox.checked::after {
+            content: '✓';
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .checklist-text {
+            color: #172b4d;
+            line-height: 1.5;
+        }
+        
+        .checklist-text.completed {
+            text-decoration: line-through;
+            color: #5e6c84;
+        }
+        
+        .members {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .member {
+            background: #0079bf;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+        
+        .attachments {
+            display: grid;
+            gap: 15px;
+        }
+        
+        .attachment {
+            background: #f4f5f7;
+            padding: 15px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: #172b4d;
+            transition: background 0.2s;
+        }
+        
+        .attachment:hover {
+            background: #ebecf0;
+        }
+        
+        .attachment-icon {
+            font-size: 24px;
+            margin-right: 12px;
+        }
+        
+        .attachment-name {
+            font-weight: 500;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 60px 30px;
+            color: #5e6c84;
+        }
+        
+        .spinner {
+            border: 3px solid #f4f5f7;
+            border-top: 3px solid #0079bf;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .error {
+            background: #eb5a46;
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px;
+        }
+        
+        .refresh-btn {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            border: none;
+            padding: 14px 32px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 30px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+        
+        .refresh-btn:hover {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+            transform: translateY(-2px);
+        }
+        
+        .footer {
+            background: #f8fafc;
+            padding: 20px 30px;
+            text-align: center;
+            color: #64748b;
+            font-size: 14px;
+            border-top: 1px solid #e2e8f0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo-container">
+                <img src="attached_assets/Untitled Design - 1_1759780984374.png" alt="Company Logo" class="logo">
+            </div>
+            <h1>Project Details</h1>
+            <p>Client Project Dashboard</p>
+            <div id="overallProgress" class="overall-progress" style="display: none;">
+                <h3>Overall Progress</h3>
+                <div class="checklist-progress">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="overallProgressFill" style="width: 0%"></div>
+                    </div>
+                    <div class="progress-text" id="overallProgressText">0%</div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="cardContent" class="card-content">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>Loading card details...</p>
+            </div>
+        </div>
+        
+        <button class="refresh-btn" onclick="loadCardData()">🔄 Refresh Data</button>
+        
+        <div class="footer">
+            © 2025 Ecaleni Guest House. All rights reserved.
+        </div>
+    </div>
+
+    <script>
+        const CARD_ID = '7rMRhGwK';
+        const API_BASE = 'https://api.trello.com/1';
+
+        async function loadCardData() {
+            const cardContent = document.getElementById('cardContent');
+            cardContent.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Loading card details...</p>
+                </div>
+            `;
+
+            try {
+                const response = await fetch(`${API_BASE}/cards/${CARD_ID}?fields=all&checklists=all&members=true&attachments=true`);
+                
+                if (!response.ok) {
+                    throw new Error('Card not found or not public');
+                }
+                
+                const card = await response.json();
+                displayCard(card);
+                
+                if (card.idChecklists && card.idChecklists.length > 0) {
+                    loadChecklists(card.idChecklists);
+                }
+            } catch (error) {
+                cardContent.innerHTML = `
+                    <div class="error">
+                        <strong>Error loading card:</strong> ${error.message}
+                        <br><br>
+                        Make sure the card is set to public visibility.
+                    </div>
+                `;
+            }
+        }
+
+        async function loadChecklists(checklistIds) {
+            const checklistsDiv = document.getElementById('checklists');
+            if (!checklistsDiv) return;
+
+            checklistsDiv.innerHTML = '<div class="loading"><p>Loading checklists...</p></div>';
+
+            try {
+                const checklists = await Promise.all(
+                    checklistIds.map(id => 
+                        fetch(`${API_BASE}/checklists/${id}`).then(r => r.json())
+                    )
+                );
+
+                if (checklists.length > 0) {
+                    let totalItems = 0;
+                    let completedItems = 0;
+
+                    checklistsDiv.innerHTML = checklists.map(checklist => {
+                        const completed = checklist.checkItems.filter(item => item.state === 'complete').length;
+                        const total = checklist.checkItems.length;
+                        const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
+                        
+                        totalItems += total;
+                        completedItems += completed;
+
+                        return `
+                            <div class="checklist">
+                                <div class="checklist-title">
+                                    <span>✓ ${checklist.name}</span>
+                                </div>
+                                <div class="checklist-progress">
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: ${percentage}%"></div>
+                                    </div>
+                                    <div class="progress-text">${percentage}%</div>
+                                </div>
+                                ${checklist.checkItems.map(item => `
+                                    <div class="checklist-item">
+                                        <div class="checklist-checkbox ${item.state === 'complete' ? 'checked' : ''}"></div>
+                                        <div class="checklist-text ${item.state === 'complete' ? 'completed' : ''}">${item.name}</div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        `;
+                    }).join('');
+
+                    const overallPercentage = totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0;
+                    updateOverallProgress(overallPercentage);
+                } else {
+                    checklistsDiv.innerHTML = '';
+                }
+            } catch (error) {
+                checklistsDiv.innerHTML = '<p style="color: #5e6c84;">Unable to load checklists</p>';
+            }
+        }
+
+        function updateOverallProgress(percentage) {
+            const overallProgress = document.getElementById('overallProgress');
+            const overallProgressFill = document.getElementById('overallProgressFill');
+            const overallProgressText = document.getElementById('overallProgressText');
+            
+            overallProgress.style.display = 'block';
+            overallProgressFill.style.width = percentage + '%';
+            overallProgressText.textContent = percentage + '%';
+        }
+
+        function displayCard(card) {
+            const cardContent = document.getElementById('cardContent');
+            
+            let html = `<div class="card-title">${card.name}</div>`;
+            
+            if (card.labels && card.labels.length > 0) {
+                html += `
+                    <div class="card-section">
+                        <div class="section-title">Labels</div>
+                        <div class="labels">
+                            ${card.labels.map(label => `
+                                <span class="label" style="background-color: ${label.color || '#b3bac5'}">
+                                    ${label.name || label.color}
+                                </span>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            if (card.desc) {
+                html += `
+                    <div class="card-section">
+                        <div class="section-title">Description</div>
+                        <div class="card-description">${card.desc}</div>
+                    </div>
+                `;
+            }
+            
+            if (card.due) {
+                const dueDate = new Date(card.due);
+                html += `
+                    <div class="card-section">
+                        <div class="section-title">Due Date</div>
+                        <div class="due-date">📅 ${dueDate.toLocaleDateString()} at ${dueDate.toLocaleTimeString()}</div>
+                    </div>
+                `;
+            }
+            
+            if (card.idChecklists && card.idChecklists.length > 0) {
+                html += `
+                    <div class="card-section">
+                        <div class="section-title">Checklists</div>
+                        <div id="checklists"></div>
+                    </div>
+                `;
+            }
+            
+            if (card.attachments && card.attachments.length > 0) {
+                html += `
+                    <div class="card-section">
+                        <div class="section-title">Attachments</div>
+                        <div class="attachments">
+                            ${card.attachments.map(att => `
+                                <a href="${att.url}" target="_blank" class="attachment">
+                                    <span class="attachment-icon">📎</span>
+                                    <span class="attachment-name">${att.name}</span>
+                                </a>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            cardContent.innerHTML = html;
+        }
+
+        loadCardData();
+    </script>
+</body>
+</html>
